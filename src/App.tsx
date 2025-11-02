@@ -1,0 +1,170 @@
+import { useEffect, useState } from 'react'
+
+import { Box, Container, Flex, Heading, List, ListItem, Spinner, Text, useColorModeValue, VStack } from '@chakra-ui/react'
+
+const cloudFrontUrl = 'https://di99qf5nvxtsu.cloudfront.net/newsletters/'
+
+const fileList = [
+  'The_Tie_That_Binds_Special_Edition_1996_February.pdf',
+  'The_Tie_That_Binds_Special_Edition_2010_March.pdf',
+  'The_Tie_That_Binds_Vol_11_Issue_1_1996_June.pdf',
+  'The_Tie_That_Binds_Vol_12_Issue_2_1996_December.pdf',
+  'The_Tie_That_Binds_Vol_2_Issue_1_1987_July.pdf',
+  'The_Tie_That_Binds_Vol_2_Issue_1_1988_February.pdf',
+  'The_Tie_That_Binds_Vol_2_Issue_2_1988_September.pdf',
+  'The_Tie_That_Binds_Vol_3_Issue_1_1989_March.pdf',
+  'The_Tie_That_Binds_Vol_3_Issue_2_1989_October.pdf',
+  'The_Tie_That_Binds_Vol_4_Issue_1_1990_May.pdf',
+  'The_Tie_That_Binds_Vol_4_Issue_2_1990_November.pdf',
+  'The_Tie_That_Binds_Vol_5_Issue_1_1991_May.pdf',
+  'The_Tie_That_Binds_Vol_5_Issue_2_1991_November.pdf',
+  'The_Tie_That_Binds_Vol_6_Issue_1_1992_May.pdf',
+  'The_Tie_That_Binds_Vol_6_Issue_2_1992_November.pdf',
+  'The_Tie_That_Binds_Vol_8_Issue_1_1994_February.pdf',
+  'The_Tie_That_Binds_Vol_8_Issue_2_1994_November.pdf',
+  'The_Tie_That_Binds_Vol_9_Issue_1_1995_August.pdf'
+]
+
+const getDate = (filename: string) => {
+  const parts = filename.replace('.pdf', '').split('_')
+  const year = parseInt(parts[parts.length - 2])
+  const month = parts[parts.length - 1]
+  return new Date(`${month} 1, ${year}`)
+}
+
+const sortedFiles = [...fileList].sort((a, b) => {
+  return getDate(a).getTime() - getDate(b).getTime()
+})
+
+function App() {
+  const [selectedFile, setSelectedFile] = useState<string>(sortedFiles[0])
+  const [isLoading, setIsLoading] = useState(true)
+
+  const bgColor = useColorModeValue('gray.50', 'gray.900')
+  const itemBg = useColorModeValue('white', 'gray.800')
+  const itemHoverBg = useColorModeValue('blue.50', 'blue.900')
+  const activeBg = useColorModeValue('blue.500', 'blue.600')
+
+  useEffect(() => {
+    setIsLoading(true)
+  }, [selectedFile])
+
+  const handleFileSelect = (file: string) => {
+    setSelectedFile(file)
+  }
+
+  const formatFileName = (filename: string) => {
+    return filename.replace(/_/g, ' ').replace('.pdf', '')
+  }
+
+  return (
+    <Box minH="100vh" bg={bgColor} py={8}>
+      <Container maxW="1200px">
+        <Heading as="h1" size="xl" color="blue.500" textAlign="center" mb={8}>
+          The Tie That Binds - Archive
+        </Heading>
+
+        <Flex
+          direction={{ base: 'column', md: 'row' }}
+          gap={4}
+          mb={8}
+        >
+          <Box
+            flex={{ base: '1', md: '0 0 33.333%' }}
+            maxH={{ base: '200px', md: '400px' }}
+            overflowY="auto"
+            borderWidth={1}
+            borderRadius="md"
+            bg={itemBg}
+            p={2}
+          >
+            <List spacing={1}>
+              {sortedFiles.map((file) => (
+                <ListItem
+                  key={file}
+                  p={2}
+                  borderRadius="md"
+                  cursor="pointer"
+                  bg={selectedFile === file ? activeBg : 'transparent'}
+                  color={selectedFile === file ? 'white' : 'inherit'}
+                  _hover={{
+                    bg: selectedFile === file ? activeBg : itemHoverBg
+                  }}
+                  onClick={() => handleFileSelect(file)}
+                >
+                  {formatFileName(file)}
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+
+          <Box flex={{ base: '1', md: '0 0 66.666%' }}>
+            {isLoading && (
+              <Flex justify="center" align="center" mb={4}>
+                <Spinner size="lg" color="blue.500" />
+                <Text ml={4}>Loading PDF...</Text>
+              </Flex>
+            )}
+            <Box
+              as="iframe"
+              src={selectedFile ? `${cloudFrontUrl}${selectedFile}` : ''}
+              width="100%"
+              height={{ base: '60vh', md: '75vh' }}
+              borderWidth={2}
+              borderColor="blue.500"
+              borderRadius="md"
+              bg="white"
+              onLoad={() => setIsLoading(false)}
+            />
+          </Box>
+        </Flex>
+
+        <Box textAlign="center" mt={8}>
+          <Heading as="h4" size="md" mb={2}>
+            Support This Archive
+          </Heading>
+          <Text mb={4}>
+            This archive makes our shared history available to everyone. If you'd like to help keep the page up, please contribute!
+          </Text>
+          <Box
+            as="form"
+            action="https://www.paypal.com/donate"
+            method="post"
+            target="_top"
+            display="inline-block"
+          >
+            <input type="hidden" name="business" value="Q2BDTQ9YF6QK6" />
+            <input type="hidden" name="no_recurring" value="0" />
+            <input
+              type="hidden"
+              name="item_name"
+              value="This archive makes our shared history available to everyone. If you'd like to help keep the page up, please contribute!"
+            />
+            <input type="hidden" name="currency_code" value="USD" />
+            <Box
+              as="input"
+              type="image"
+              src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif"
+              border="0"
+              name="submit"
+              title="PayPal - The safer, easier way to pay online!"
+              alt="Donate with PayPal button"
+              cursor="pointer"
+            />
+            <Box
+              as="img"
+              alt=""
+              border="0"
+              src="https://www.paypal.com/en_US/i/scr/pixel.gif"
+              width="1"
+              height="1"
+            />
+          </Box>
+        </Box>
+      </Container>
+    </Box>
+  )
+}
+
+export default App
+
