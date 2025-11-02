@@ -1,14 +1,9 @@
 import { useEffect, useState } from 'react'
 
-import { Box, Container, Flex, Heading, List, ListItem, Spinner, Text, useColorModeValue, VStack } from '@chakra-ui/react'
-
-const cloudFrontUrl = 'https://di99qf5nvxtsu.cloudfront.net/newsletters/'
+import { Box, Container, Flex, Heading, List, ListItem, Spinner, Text, useColorModeValue } from '@chakra-ui/react'
 
 const fileList = [
-  'The_Tie_That_Binds_Special_Edition_1996_February.pdf',
-  'The_Tie_That_Binds_Special_Edition_2010_March.pdf',
-  'The_Tie_That_Binds_Vol_11_Issue_1_1996_June.pdf',
-  'The_Tie_That_Binds_Vol_12_Issue_2_1996_December.pdf',
+  'No_Name_Newsletter_Vol_1_Issue_2_1986_12_30.pdf',
   'The_Tie_That_Binds_Vol_2_Issue_1_1987_July.pdf',
   'The_Tie_That_Binds_Vol_2_Issue_1_1988_February.pdf',
   'The_Tie_That_Binds_Vol_2_Issue_2_1988_September.pdf',
@@ -22,11 +17,28 @@ const fileList = [
   'The_Tie_That_Binds_Vol_6_Issue_2_1992_November.pdf',
   'The_Tie_That_Binds_Vol_8_Issue_1_1994_February.pdf',
   'The_Tie_That_Binds_Vol_8_Issue_2_1994_November.pdf',
-  'The_Tie_That_Binds_Vol_9_Issue_1_1995_August.pdf'
+  'The_Tie_That_Binds_Vol_9_Issue_1_1995_August.pdf',
+  'The_Tie_That_Binds_Special_Edition_1996_February.pdf',
+  'The_Tie_That_Binds_Vol_11_Issue_1_1996_June.pdf',
+  'The_Tie_That_Binds_Vol_12_Issue_2_1996_December.pdf',
+  'The_Tie_That_Binds_Special_Edition_2010_March.pdf',
+  'Walter_Harvey_Titus_Interview_1975.pdf'
 ]
 
 const getDate = (filename: string) => {
   const parts = filename.replace('.pdf', '').split('_')
+  
+  if (filename.includes('Walter_Harvey_Titus_Interview')) {
+    return new Date('1975-01-01')
+  }
+  
+  if (filename.includes('No_Name_Newsletter')) {
+    const year = parseInt(parts[parts.length - 3])
+    const month = parseInt(parts[parts.length - 2])
+    const day = parseInt(parts[parts.length - 1])
+    return new Date(year, month - 1, day)
+  }
+  
   const year = parseInt(parts[parts.length - 2])
   const month = parts[parts.length - 1]
   return new Date(`${month} 1, ${year}`)
@@ -107,7 +119,7 @@ function App() {
             )}
             <Box
               as="iframe"
-              src={selectedFile ? `${cloudFrontUrl}${selectedFile}` : ''}
+              src={selectedFile ? `/articles/${selectedFile}` : ''}
               width="100%"
               height={{ base: '60vh', md: '75vh' }}
               borderWidth={2}
