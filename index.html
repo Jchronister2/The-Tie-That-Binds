@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Tie That Binds - Archive</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+        .pdf-viewer {
+            width: 100%;
+            height: 75vh;
+            border: 2px solid #007bff;
+            background-color: #fff;
+        }
+        .file-list-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 5px;
+            padding: 5px;
+        }
+        .list-group-item {
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .list-group-item:hover, .list-group-item.active {
+            background-color: #007bff;
+            color: white;
+        }
+        .loading-indicator {
+            display: none;
+            font-size: 18px;
+            color: #007bff;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .donate-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        @media (max-width: 768px) {
+            .row {
+                flex-direction: column;
+            }
+            .col-md-4 {
+                order: 2;
+            }
+            .col-md-8 {
+                order: 1;
+            }
+            .file-list-container {
+                max-height: 200px;
+            }
+            .pdf-viewer {
+                height: 60vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="mb-4 text-primary text-center">The Tie That Binds - Archive</h1>
+        <div class="row d-flex">
+            <div class="col-md-4">
+                <div class="file-list-container">
+                    <ul class="list-group" id="file-list"></ul>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="loading-indicator" id="loading-indicator">Loading PDF...</div>
+                <iframe id="pdf-viewer" class="pdf-viewer" src=""></iframe>
+            </div>
+        </div>
+        <div class="donate-container">
+            <h4>Support This Archive</h4>
+            <p>This archive makes our shared history available to everyone. If you'd like to help keep the page up, please contribute!</p>
+            <form action="https://www.paypal.com/donate" method="post" target="_top">
+                <input type="hidden" name="business" value="Q2BDTQ9YF6QK6" />
+                <input type="hidden" name="no_recurring" value="0" />
+                <input type="hidden" name="item_name" value="This archive makes our shared history available to everyone. If you'd like to help keep the page up, please contribute!" />
+                <input type="hidden" name="currency_code" value="USD" />
+                <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+                <img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1" />
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        const cloudFrontUrl = 'https://di99qf5nvxtsu.cloudfront.net/newsletters/';
+        let fileList = [
+            'The_Tie_That_Binds_Special_Edition_1996_February.pdf',
+            'The_Tie_That_Binds_Special_Edition_2010_March.pdf',
+            'The_Tie_That_Binds_Vol_11_Issue_1_1996_June.pdf',
+            'The_Tie_That_Binds_Vol_12_Issue_2_1996_December.pdf',
+            'The_Tie_That_Binds_Vol_2_Issue_1_1987_July.pdf',
+            'The_Tie_That_Binds_Vol_2_Issue_1_1988_February.pdf',
+            'The_Tie_That_Binds_Vol_2_Issue_2_1988_September.pdf',
+            'The_Tie_That_Binds_Vol_3_Issue_1_1989_March.pdf',
+            'The_Tie_That_Binds_Vol_3_Issue_2_1989_October.pdf',
+            'The_Tie_That_Binds_Vol_4_Issue_1_1990_May.pdf',
+            'The_Tie_That_Binds_Vol_4_Issue_2_1990_November.pdf',
+            'The_Tie_That_Binds_Vol_5_Issue_1_1991_May.pdf',
+            'The_Tie_That_Binds_Vol_5_Issue_2_1991_November.pdf',
+            'The_Tie_That_Binds_Vol_6_Issue_1_1992_May.pdf',
+            'The_Tie_That_Binds_Vol_6_Issue_2_1992_November.pdf',
+            'The_Tie_That_Binds_Vol_8_Issue_1_1994_February.pdf',
+            'The_Tie_That_Binds_Vol_8_Issue_2_1994_November.pdf',
+            'The_Tie_That_Binds_Vol_9_Issue_1_1995_August.pdf'
+        ];
+        
+        fileList.sort((a, b) => {
+            const getDate = (filename) => {
+                const parts = filename.replace('.pdf', '').split('_');
+                const year = parseInt(parts[parts.length - 2]);
+                const month = parts[parts.length - 1];
+                return new Date(`${month} 1, ${year}`);
+            };
+            return getDate(a) - getDate(b);
+        });
+
+        const listElement = document.getElementById('file-list');
+        const pdfViewer = document.getElementById('pdf-viewer');
+        const loadingIndicator = document.getElementById('loading-indicator');
+
+        let firstPdf = null;
+
+        fileList.forEach((file, index) => {
+            const formattedName = file.replace(/_/g, ' ').replace('.pdf', '');
+            const listItem = document.createElement('li');
+            listItem.classList.add('list-group-item', 'list-group-item-action');
+            listItem.textContent = formattedName;
+            listItem.onclick = () => {
+                document.querySelectorAll('.list-group-item').forEach(item => item.classList.remove('active'));
+                listItem.classList.add('active');
+                loadingIndicator.style.display = 'block';
+                pdfViewer.src = cloudFrontUrl + file;
+            };
+            if (index === 0) firstPdf = file;
+            listElement.appendChild(listItem);
+        });
+
+        if (firstPdf) {
+            document.querySelector('.list-group-item').click();
+        }
+
+        pdfViewer.onload = () => {
+            loadingIndicator.style.display = 'none';
+        };
+    </script>
+</body>
+</html>
