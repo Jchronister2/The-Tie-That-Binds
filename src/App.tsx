@@ -27,18 +27,18 @@ const fileList = [
 
 const getDate = (filename: string) => {
   const parts = filename.replace('.pdf', '').split('_')
-  
+
   if (filename.includes('Walter_Harvey_Titus_Interview')) {
     return new Date('1975-01-01')
   }
-  
+
   if (filename.includes('No_Name_Newsletter')) {
     const year = parseInt(parts[parts.length - 3])
     const month = parseInt(parts[parts.length - 2])
     const day = parseInt(parts[parts.length - 1])
     return new Date(year, month - 1, day)
   }
-  
+
   const year = parseInt(parts[parts.length - 2])
   const month = parts[parts.length - 1]
   return new Date(`${month} 1, ${year}`)
@@ -119,7 +119,7 @@ function App() {
             )}
             <Box
               as="iframe"
-              src={selectedFile ? `/articles/${selectedFile}` : ''}
+              src={selectedFile ? `${import.meta.env.BASE_URL}articles/${selectedFile}` : ''}
               width="100%"
               height={{ base: '60vh', md: '75vh' }}
               borderWidth={2}
