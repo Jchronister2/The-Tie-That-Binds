@@ -52,6 +52,7 @@ function App() {
   const isMobile = useBreakpointValue({ base: true, lg: false })
   const [selectedFile, setSelectedFile] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isFullScreen, setIsFullScreen] = useState(false)
 
   const bgColor = useColorModeValue('gray.50', 'gray.900')
   const itemBg = useColorModeValue('white', 'gray.800')
@@ -157,9 +158,49 @@ function App() {
           </Box>
 
           {!isMobile && (
-            <Box flex={{ base: '1', lg: '0 0 66.666%' }}>
+            <Box
+              flex={isFullScreen ? undefined : { base: '1', lg: '0 0 66.666%' }}
+              position={isFullScreen ? 'fixed' : 'relative'}
+              inset={isFullScreen ? 0 : undefined}
+              zIndex={isFullScreen ? 2000 : undefined}
+              bg={isFullScreen ? 'gray.900' : undefined}
+              h={isFullScreen ? '100vh' : undefined}
+              display={isFullScreen ? 'flex' : 'block'}
+              flexDirection={isFullScreen ? 'column' : undefined}
+            >
+              {isFullScreen && (
+                <Flex p={2} bg="blue.600" align="center" justify="space-between" boxShadow="md">
+                  <Button
+                    size="sm"
+                    onClick={() => setIsFullScreen(false)}
+                    variant="outline"
+                    color="white"
+                    borderColor="white"
+                    _hover={{ bg: 'whiteAlpha.200' }}
+                    _active={{ bg: 'whiteAlpha.300' }}
+                  >
+                    Exit Full Screen
+                  </Button>
+                  <Text color="white" fontWeight="bold" noOfLines={1} ml={4} flex={1} textAlign="right">
+                    {selectedFile ? formatFileName(selectedFile) : ''}
+                  </Text>
+                </Flex>
+              )}
+
+              {!isFullScreen && selectedFile && (
+                <Flex justify="flex-end" mb={2}>
+                  <Button
+                    size="sm"
+                    colorScheme="blue"
+                    onClick={() => setIsFullScreen(true)}
+                  >
+                    Full Screen
+                  </Button>
+                </Flex>
+              )}
+
               {isLoading && (
-                <Flex justify="center" align="center" mb={4}>
+                <Flex justify="center" align="center" mb={4} h={isFullScreen ? '100%' : undefined}>
                   <Spinner size="lg" color="blue.500" />
                   <Text ml={4}>Loading PDF...</Text>
                 </Flex>
@@ -169,10 +210,10 @@ function App() {
                   as="iframe"
                   src={`${import.meta.env.BASE_URL}articles/${selectedFile}`}
                   width="100%"
-                  height={{ base: '60vh', md: '75vh' }}
-                  borderWidth={2}
+                  height={isFullScreen ? '100%' : { base: '60vh', lg: '75vh' }}
+                  borderWidth={isFullScreen ? 0 : 2}
                   borderColor="blue.500"
-                  borderRadius="md"
+                  borderRadius={isFullScreen ? 0 : 'md'}
                   bg="white"
                   onLoad={() => setIsLoading(false)}
                 />
