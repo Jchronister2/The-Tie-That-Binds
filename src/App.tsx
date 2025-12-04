@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { Box, Container, Flex, Heading, List, ListItem, Spinner, Text, useColorModeValue } from '@chakra-ui/react'
+import { Box, Button, Container, Flex, Heading, List, ListItem, Spinner, Text, useBreakpointValue, useColorModeValue } from '@chakra-ui/react'
 
 const fileList = [
   'No_Name_Newsletter_Vol_1_Issue_2_1986_12_30.pdf',
@@ -49,13 +49,20 @@ const sortedFiles = [...fileList].sort((a, b) => {
 })
 
 function App() {
-  const [selectedFile, setSelectedFile] = useState<string>(sortedFiles[0])
+  const isMobile = useBreakpointValue({ base: true, lg: false })
+  const [selectedFile, setSelectedFile] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   const bgColor = useColorModeValue('gray.50', 'gray.900')
   const itemBg = useColorModeValue('white', 'gray.800')
   const itemHoverBg = useColorModeValue('blue.50', 'blue.900')
   const activeBg = useColorModeValue('blue.500', 'blue.600')
+
+  useEffect(() => {
+    if (isMobile === false && !selectedFile) {
+      setSelectedFile(sortedFiles[0])
+    }
+  }, [isMobile, selectedFile])
 
   useEffect(() => {
     setIsLoading(true)
@@ -69,6 +76,45 @@ function App() {
     return filename.replace(/_/g, ' ').replace('.pdf', '')
   }
 
+  if (isMobile && selectedFile) {
+    return (
+      <Box h="100vh" bg="gray.900" display="flex" flexDirection="column">
+        <Flex p={2} bg="blue.600" align="center" justify="space-between" boxShadow="md">
+          <Button
+            size="sm"
+            onClick={() => setSelectedFile(null)}
+            variant="outline"
+            color="white"
+            borderColor="white"
+            _hover={{ bg: 'whiteAlpha.200' }}
+            _active={{ bg: 'whiteAlpha.300' }}
+          >
+            Back
+          </Button>
+          <Text color="white" fontWeight="bold" noOfLines={1} ml={4} flex={1} textAlign="right">
+            {formatFileName(selectedFile)}
+          </Text>
+        </Flex>
+        <Box flex={1} position="relative">
+          {isLoading && (
+            <Flex position="absolute" inset={0} justify="center" align="center" bg="white" zIndex={1}>
+              <Spinner size="lg" color="blue.500" />
+              <Text ml={4}>Loading PDF...</Text>
+            </Flex>
+          )}
+          <Box
+            as="iframe"
+            src={`${import.meta.env.BASE_URL}articles/${selectedFile}`}
+            width="100%"
+            height="100%"
+            bg="white"
+            onLoad={() => setIsLoading(false)}
+          />
+        </Box>
+      </Box>
+    )
+  }
+
   return (
     <Box minH="100vh" bg={bgColor} py={8}>
       <Container maxW="1200px">
@@ -77,13 +123,13 @@ function App() {
         </Heading>
 
         <Flex
-          direction={{ base: 'column', md: 'row' }}
+          direction={{ base: 'column', lg: 'row' }}
           gap={4}
           mb={8}
         >
           <Box
-            flex={{ base: '1', md: '0 0 33.333%' }}
-            maxH={{ base: '200px', md: '400px' }}
+            flex={{ base: '1', lg: '0 0 33.333%' }}
+            maxH={{ base: '60vh', lg: '75vh' }}
             overflowY="auto"
             borderWidth={1}
             borderRadius="md"
@@ -110,25 +156,29 @@ function App() {
             </List>
           </Box>
 
-          <Box flex={{ base: '1', md: '0 0 66.666%' }}>
-            {isLoading && (
-              <Flex justify="center" align="center" mb={4}>
-                <Spinner size="lg" color="blue.500" />
-                <Text ml={4}>Loading PDF...</Text>
-              </Flex>
-            )}
-            <Box
-              as="iframe"
-              src={selectedFile ? `${import.meta.env.BASE_URL}articles/${selectedFile}` : ''}
-              width="100%"
-              height={{ base: '60vh', md: '75vh' }}
-              borderWidth={2}
-              borderColor="blue.500"
-              borderRadius="md"
-              bg="white"
-              onLoad={() => setIsLoading(false)}
-            />
-          </Box>
+          {!isMobile && (
+            <Box flex={{ base: '1', lg: '0 0 66.666%' }}>
+              {isLoading && (
+                <Flex justify="center" align="center" mb={4}>
+                  <Spinner size="lg" color="blue.500" />
+                  <Text ml={4}>Loading PDF...</Text>
+                </Flex>
+              )}
+              {selectedFile && (
+                <Box
+                  as="iframe"
+                  src={`${import.meta.env.BASE_URL}articles/${selectedFile}`}
+                  width="100%"
+                  height={{ base: '60vh', md: '75vh' }}
+                  borderWidth={2}
+                  borderColor="blue.500"
+                  borderRadius="md"
+                  bg="white"
+                  onLoad={() => setIsLoading(false)}
+                />
+              )}
+            </Box>
+          )}
         </Flex>
 
         <Box textAlign="center" mt={8}>
